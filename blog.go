@@ -1,12 +1,15 @@
 package main
 
 import (
+	"bytes"
 	"database/sql"
 	"html/template"
 	"log"
 	"net/http"
 
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/extension"
 )
 
 type Post struct {
@@ -15,7 +18,7 @@ type Post struct {
 	FormattedCreatedAt string
 	Slug               string
 	MetaDescription    string
-	Content            string
+	Content            template.HTML
 }
 
 func getPosts() ([]Post, error) {
@@ -61,13 +64,23 @@ func getPost(slug string) (Post, error) {
 	defer db.Close()
 
 	row := db.QueryRow("SELECT title, slug, meta_description, content, created_at FROM posts WHERE slug = ?", slug)
-	if err := row.Scan(&post.Title, &post.Slug, &post.MetaDescription, &post.Content, &post.CreatedAt); err != nil {
+	var source []byte
+	if err := row.Scan(&post.Title, &post.Slug, &post.MetaDescription, &source, &post.CreatedAt); err != nil {
 		return post, err
 	}
 	post.FormattedCreatedAt, err = formatDateTime("2006-01-02 15:04:05", post.CreatedAt)
 	if err != nil {
 		return post, err
 	}
+
+	markdown := goldmark.New(goldmark.WithExtensions(extension.Footnote))
+
+	var buf bytes.Buffer
+	if err := markdown.Convert(source, &buf); err != nil {
+		return post, err
+	}
+
+	post.Content = template.HTML(buf.String())
 
 	return post, nil
 }

@@ -20,7 +20,7 @@ CREATE TABLE posts (
         -- Length constraints
         AND length(slug) BETWEEN 3 AND 100
     ),
-    content TEXT NOT NULL,
+    content BLOB NOT NULL,
     meta_description TEXT NOT NULL,
     -- status TEXT CHECK(status IN ('draft', 'published')) NOT NULL DEFAULT 'draft',
     created_at TEXT NOT NULL

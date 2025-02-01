@@ -1,19 +1,15 @@
-{{define "content"}}
-<ul>
-    {{range .}}
-    <table>
-        <tr>
-            <th colspan="2">
-                <a href="/blog/{{.Slug}}">{{.Title}}</a>
-            </th>
-        </tr>
-        <tr>
-            <td>{{.MetaDescription}}</td>
-            <td>
-                <time datetime="{{.CreatedAt}}">{{.FormattedCreatedAt}}</time>
-            </td>
-        </tr>
-    </table>
-    {{end}}
-</ul>
-{{end}}
+{{define "content"}} {{range .}}
+<table>
+    <tr>
+        <th colspan="2">
+            <a href="/blog/{{.Slug}}">{{.Title}}</a>
+        </th>
+    </tr>
+    <tr>
+        <td>{{.MetaDescription}}</td>
+        <td>
+            <time datetime="{{.CreatedAt}}">{{.FormattedCreatedAt}}</time>
+        </td>
+    </tr>
+</table>
+{{end}} {{end}}
