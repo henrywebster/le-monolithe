@@ -1,0 +1,15 @@
+{{define "reading"}}
+<div>
+    <h2>currently reading</h2>
+    <table>
+        {{range .CurrentlyReading}}
+        <tr>
+            <td>
+                <a href="{{.link}}"><em>{{.title}}</em></a>
+            </td>
+            <td>{{.authorName}}</td>
+        </tr>
+        {{end}}
+    </table>
+</div>
+{{end}}

@@ -1,0 +1,12 @@
+{{define "status"}}
+<h2>latest status</h2>
+<table>
+    <tr>
+        <td colspan="2">{{.Status.content}}</td>
+    </tr>
+    <tr>
+        <td>{{.Status.face}}</td>
+        <td><code>{{.Status.timeAgo}}</code></td>
+    </tr>
+</table>
+{{end}}

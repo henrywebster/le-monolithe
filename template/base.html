@@ -1,7 +1,9 @@
+{{define "base"}}
 <!doctype html>
 <html lang="en-US">
     <head>
         <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
@@ -16,6 +18,7 @@
                 padding: 20px;
                 max-width: 720px;
                 margin: auto;
+                background-color: #f0f0f0;
             }
             a {
                 color: blue;
@@ -30,17 +33,47 @@
             h1 {
                 color: black;
             }
+            ul {
+                padding: 0;
+                list-style-type: none;
+            }
+            img {
+                border-style: solid;
+                border-width: thin;
+            }
+            table {
+                border-collapse: collapse;
+                background-color: white;
+                width: 100%;
+                margin-bottom: 1em;
+            }
+            td,
+            th {
+                border: 1px solid black;
+                padding: 5px;
+                text-align: left;
+            }
+            fieldset {
+                border: 1px solid black;
+            }
+            td time {
+                font-family: monospace;
+                white-space: nowrap;
+            }
         </style>
         <title>henz world</title>
     </head>
     <body>
         <header>
             <a class="title" href="/">
-                <h1>henz world</h1>
+                <h1>henz world 🌎</h1>
             </a>
             <nav>
                 <ul>
                     <li><a href="/">home</a></li>
+                    <li>
+                        <a href="/blog">blog</a>
+                    </li>
                     <li>
                         <a href="mailto:henz.world.qv1ok@dralias.com"
                             >contact</a
@@ -49,17 +82,7 @@
                 </ul>
             </nav>
         </header>
-        <main>
-            <h2>dispatch from the author</h2>
-            <p>Welcome to my world!</p>
-            <p>
-                I get a kick out of doing things. Lots of things. Basically,
-                <em>any</em>thing.
-            </p>
-            <p>
-                — Henry J. Webster <em>(legal name)</em>, Brooklyn, NY, USA
-                <em>(likely location)</em>
-            </p>
-        </main>
+        <main>{{template "content" .}}</main>
     </body>
 </html>
+{{end}}

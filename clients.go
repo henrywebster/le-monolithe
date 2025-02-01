@@ -1,0 +1,133 @@
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"io"
+	"log"
+	"net/http"
+	"os"
+	"time"
+
+	"github.com/mmcdole/gofeed"
+)
+
+type ItemMapper = func([]*gofeed.Item) []map[string]string
+
+func getRss(url string, mapItems ItemMapper) ([]map[string]string, error) {
+	fp := gofeed.NewParser()
+	feed, err := fp.ParseURL(url)
+
+	if err != nil {
+		return nil, err
+	}
+
+	items := mapItems(feed.Items)
+
+	return items, nil
+}
+
+func mapLetterboxd(items []*gofeed.Item) []map[string]string {
+	// TODO - handle errors
+	data := make([]map[string]string, len(items))
+	for i := 0; i < len(items); i++ {
+		formattedDate, _ := formatTime("2006-01-02", items[i].Extensions["letterboxd"]["watchedDate"][0].Value)
+
+		data[i] = make(map[string]string)
+		data[i]["title"] = items[i].Extensions["letterboxd"]["filmTitle"][0].Value
+		data[i]["filmYear"] = items[i].Extensions["letterboxd"]["filmYear"][0].Value
+		data[i]["watchedDate"] = items[i].Extensions["letterboxd"]["watchedDate"][0].Value
+		data[i]["formattedWatchedDate"] = formattedDate
+		data[i]["link"] = items[i].Link
+	}
+	return data[:5]
+}
+
+func mapGoodreads(items []*gofeed.Item) []map[string]string {
+	// TODO - handle errors
+	data := make([]map[string]string, len(items))
+	for i := 0; i < len(items); i++ {
+		data[i] = make(map[string]string)
+		data[i]["title"] = items[i].Title
+		data[i]["link"] = items[i].Link
+		data[i]["authorName"] = items[i].Custom["author_name"]
+	}
+	return data
+}
+
+func getStatus() (map[string]string, error) {
+	url := "https://status.cafe/users/henz/status.json"
+	response, err := http.Get(url)
+
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	var status map[string]string
+	err = json.NewDecoder(response.Body).Decode(&status)
+	if err != nil {
+		return nil, err
+	}
+	return status, nil
+}
+
+func getCommits() ([]map[string]interface{}, error) {
+	jsonData := map[string]string{
+		"query": os.Getenv("GITHUB_GRAPHQL_QUERY"),
+	}
+
+	reqBody, err := json.Marshal(jsonData)
+	if err != nil {
+		return nil, err
+	}
+
+	token := os.Getenv("GITHUB_TOKEN")
+
+	req, err := http.NewRequest("POST", "https://api.github.com/graphql", bytes.NewBuffer(reqBody))
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Content-Type", "application/json")
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	result, err := io.ReadAll(response.Body)
+	var body map[string]interface{}
+	if err := json.Unmarshal(result, &body); err != nil {
+		return nil, err
+	}
+
+	log.Println(body)
+
+	data := body["data"].(map[string]interface{})
+	viewer := data["viewer"].(map[string]interface{})
+	repo := viewer["repository"].(map[string]interface{})
+	defaultBranch := repo["defaultBranchRef"].(map[string]interface{})
+	target := defaultBranch["target"].(map[string]interface{})
+	history := target["history"].(map[string]interface{})
+	nodes := history["nodes"].([]interface{})
+
+	commits := make([]map[string]interface{}, len(nodes))
+	for i, node := range nodes {
+		commits[i] = node.(map[string]interface{})
+	}
+
+	for _, commit := range commits {
+		formattedTime, err := formatDateTime(time.RFC3339, commit["committedDate"].(string))
+		if err != nil {
+			return nil, err
+		}
+
+		commit["repositoryName"] = repo["name"]
+		commit["repositoryUrl"] = repo["url"]
+		commit["formattedCommittedDate"] = formattedTime
+	}
+
+	return commits, nil
+}

@@ -1,0 +1,26 @@
+{{define "commits"}}
+<div>
+    <h2>latest code</h2>
+    {{range .Commits}}
+    <table>
+        <tr>
+            <th colspan="2">
+                <a href="{{.commitUrl}}"><code>{{.messageHeadline}}</code></a>
+            </th>
+        </tr>
+        <tr>
+            <td>
+                <a href="{{.respositoryUrl}}"
+                    ><code>{{.repositoryName}}</code></a
+                >
+            </td>
+            <td>
+                <time datetime="{{.comittedDate}}"
+                    >{{.formattedCommittedDate}}</time
+                >
+            </td>
+        </tr>
+    </table>
+    {{end}}
+</div>
+{{end}}
