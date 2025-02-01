@@ -14,15 +14,29 @@ import (
 
 type ItemMapper = func([]*gofeed.Item) []map[string]string
 
+var cache = NewCache(time.Minute)
+
 func getRss(url string, mapItems ItemMapper) ([]map[string]string, error) {
+
+	if data, found := cache.Get(url); found {
+		return data.([]map[string]string), nil
+	}
+
 	fp := gofeed.NewParser()
 	feed, err := fp.ParseURL(url)
+	log.Println("Fetching", url)
 
 	if err != nil {
 		return nil, err
 	}
 
 	items := mapItems(feed.Items)
+
+	options, err := readOptions()
+	if err != nil {
+		return nil, err
+	}
+	cache.Set(url, items, options.DefaultCacheTTL)
 
 	return items, nil
 }
@@ -57,7 +71,13 @@ func mapGoodreads(items []*gofeed.Item) []map[string]string {
 
 func getStatus() (map[string]string, error) {
 	url := "https://status.cafe/users/henz/status.json"
+
+	if data, found := cache.Get(url); found {
+		return data.(map[string]string), nil
+	}
+
 	response, err := http.Get(url)
+	log.Println("Fetching", url)
 
 	if err != nil {
 		return nil, err
@@ -69,10 +89,21 @@ func getStatus() (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	options, err := readOptions()
+	if err != nil {
+		return nil, err
+	}
+	cache.Set(url, status, options.DefaultCacheTTL)
+
 	return status, nil
 }
 
 func getCommits() ([]map[string]interface{}, error) {
+	if data, found := cache.Get("commits"); found {
+		return data.([]map[string]interface{}), nil
+	}
+
 	jsonData := map[string]string{
 		"query": os.Getenv("GITHUB_GRAPHQL_QUERY"),
 	}
@@ -92,6 +123,7 @@ func getCommits() ([]map[string]interface{}, error) {
 	}
 
 	response, err := http.DefaultClient.Do(req)
+	log.Println("Fetching commits")
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +135,7 @@ func getCommits() ([]map[string]interface{}, error) {
 		return nil, err
 	}
 
-	log.Println(body)
+	//log.Println(body)
 
 	data := body["data"].(map[string]interface{})
 	viewer := data["viewer"].(map[string]interface{})
@@ -128,6 +160,12 @@ func getCommits() ([]map[string]interface{}, error) {
 		commit["repositoryUrl"] = repo["url"]
 		commit["formattedCommittedDate"] = formattedTime
 	}
+
+	options, err := readOptions()
+	if err != nil {
+		return nil, err
+	}
+	cache.Set("commits", commits, options.DefaultCacheTTL)
 
 	return commits, nil
 }

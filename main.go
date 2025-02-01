@@ -4,6 +4,8 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 	"time"
 )
 
@@ -50,11 +52,23 @@ func formatDateTime(inputFormat string, t string) (string, error) {
 	return date.Format("Jan 2, 2006 15:04"), nil
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-		return
+type Options struct {
+	DefaultCacheTTL time.Duration
+}
+
+func readOptions() (Options, error) {
+	var options Options
+	defaultCacheTTLStr := os.Getenv("CACHE_TTL")
+	defaultCacheTTL, err := strconv.ParseInt(defaultCacheTTLStr, 10, 64)
+	if err != nil {
+		return options, err
 	}
+	options.DefaultCacheTTL = time.Duration(defaultCacheTTL) * time.Second
+
+	return options, nil
+}
+
+func handler(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.New("").ParseFiles("template/base.html", "template/home.html", "template/commits.html", "template/status.html", "template/watched.html", "template/reading.html")
 	if err != nil {

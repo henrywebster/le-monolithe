@@ -1,4 +1,9 @@
 CREATE TABLE IF NOT EXISTS "schema_migrations" (version varchar(128) primary key);
+CREATE TABLE cache (
+    k TEXT NOT NULL PRIMARY KEY,
+    ttl INTEGER NOT NULL,
+    data BLOB NOT NULL
+) STRICT;
 CREATE TABLE posts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
