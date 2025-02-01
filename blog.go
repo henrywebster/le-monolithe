@@ -85,50 +85,37 @@ func getPost(slug string) (Post, error) {
 	return post, nil
 }
 
-func blogHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-		return
-	}
+func newBlogHandler(tmpl *template.Template, _ *Options) http.HandlerFunc {
 
-	tmpl, err := template.New("").ParseFiles("template/base.html", "template/blog.html")
+	return func(w http.ResponseWriter, r *http.Request) {
 
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	posts, err := getPosts()
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	tmpl.ExecuteTemplate(w, "base", posts)
-}
-
-func blogPostHandler(w http.ResponseWriter, r *http.Request) {
-	slug := r.PathValue("slug")
-
-	post, err := getPost(slug)
-	if err != nil {
-		log.Println(err.Error())
-		if err == sql.ErrNoRows {
-			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		posts, err := getPosts()
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
 
-	tmpl, err := template.New("").ParseFiles("template/base.html", "template/post.html")
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		tmpl.ExecuteTemplate(w, "base", posts)
 	}
+}
 
-	tmpl.ExecuteTemplate(w, "base", post)
+func newBlogPostHandler(tmpl *template.Template, _ *Options) http.HandlerFunc {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		slug := r.PathValue("slug")
+
+		post, err := getPost(slug)
+		if err != nil {
+			log.Println(err.Error())
+			if err == sql.ErrNoRows {
+				http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+				return
+			}
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		tmpl.ExecuteTemplate(w, "base", post)
+	}
 }
