@@ -6,7 +6,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/mmcdole/gofeed"
@@ -99,21 +98,19 @@ func getStatus() (map[string]string, error) {
 	return status, nil
 }
 
-func getCommits() ([]map[string]interface{}, error) {
+func getCommits(token string, query string) ([]map[string]interface{}, error) {
 	if data, found := cache.Get("commits"); found {
 		return data.([]map[string]interface{}), nil
 	}
 
 	jsonData := map[string]string{
-		"query": os.Getenv("GITHUB_GRAPHQL_QUERY"),
+		"query": query,
 	}
 
 	reqBody, err := json.Marshal(jsonData)
 	if err != nil {
 		return nil, err
 	}
-
-	token := os.Getenv("GITHUB_TOKEN")
 
 	req, err := http.NewRequest("POST", "https://api.github.com/graphql", bytes.NewBuffer(reqBody))
 	req.Header.Set("Authorization", "Bearer "+token)

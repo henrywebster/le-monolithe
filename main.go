@@ -14,7 +14,13 @@ import (
 // - use async
 
 func main() {
-	http.HandleFunc("GET /{$}", handler)
+
+	homeHandler, err := newHomeHandler()
+	if err != nil {
+		panic(err)
+	}
+
+	http.HandleFunc("GET /{$}", homeHandler)
 	http.HandleFunc("GET /blog", blogHandler)
 	http.HandleFunc("GET /blog/{slug}", blogPostHandler)
 
@@ -54,6 +60,10 @@ func formatDateTime(inputFormat string, t string) (string, error) {
 
 type Options struct {
 	DefaultCacheTTL time.Duration
+	LetterboxdURL   string
+	GoodreadsURL    string
+	GithubToken     string
+	GithubQuery     string
 }
 
 func readOptions() (Options, error) {
@@ -65,45 +75,56 @@ func readOptions() (Options, error) {
 	}
 	options.DefaultCacheTTL = time.Duration(defaultCacheTTL) * time.Second
 
+	options.LetterboxdURL = os.Getenv("LETTERBOXD_URL")
+	options.GoodreadsURL = os.Getenv("GOODREADS_URL")
+	options.GithubToken = os.Getenv("GITHUB_TOKEN")
+	options.GithubQuery = os.Getenv("GITHUB_GRAPHQL_QUERY")
+
 	return options, nil
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
-
+func newHomeHandler() (http.HandlerFunc, error) {
 	tmpl, err := template.New("").ParseFiles("template/base.html", "template/home.html", "template/commits.html", "template/status.html", "template/watched.html", "template/reading.html")
 	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return nil, err
 	}
 
-	commits, err := getCommits()
+	options, err := readOptions()
 	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return nil, err
 	}
 
-	status, err := getStatus()
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	return func(w http.ResponseWriter, r *http.Request) {
 
-	recentlyWatched, err := getRss("https://letterboxd.com/hwebs/rss/", mapLetterboxd)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+		commits, err := getCommits(options.GithubToken, options.GithubQuery)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
-	currentlyReading, err := getRss("https://www.goodreads.com/review/list_rss/159263337?key=qDjiqflyhso0h4tUk8bW2USB19csqQ3NW32j7SBIIf6FFVG8&shelf=currently-reading", mapGoodreads)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+		status, err := getStatus()
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
-	tmpl.ExecuteTemplate(w, "base", Data{Status: status, RecentlyWatched: recentlyWatched, CurrentlyReading: currentlyReading, Commits: commits})
+		recentlyWatched, err := getRss(options.LetterboxdURL, mapLetterboxd)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		currentlyReading, err := getRss(options.GoodreadsURL, mapGoodreads)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		tmpl.ExecuteTemplate(w, "base", Data{Status: status, RecentlyWatched: recentlyWatched, CurrentlyReading: currentlyReading, Commits: commits})
+
+	}, nil
 }
