@@ -64,6 +64,7 @@ type Options struct {
 	GoodreadsURL    string
 	GithubToken     string
 	GithubQuery     string
+	StatusCafeURL   string
 }
 
 func readOptions() (Options, error) {
@@ -79,6 +80,7 @@ func readOptions() (Options, error) {
 	options.GoodreadsURL = os.Getenv("GOODREADS_URL")
 	options.GithubToken = os.Getenv("GITHUB_TOKEN")
 	options.GithubQuery = os.Getenv("GITHUB_GRAPHQL_QUERY")
+	options.StatusCafeURL = os.Getenv("STATUS_CAFE_URL")
 
 	return options, nil
 }
@@ -103,7 +105,7 @@ func newHomeHandler() (http.HandlerFunc, error) {
 			return
 		}
 
-		status, err := getStatus()
+		status, err := getStatus(options.StatusCafeURL)
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)

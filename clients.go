@@ -68,8 +68,7 @@ func mapGoodreads(items []*gofeed.Item) []map[string]string {
 	return data
 }
 
-func getStatus() (map[string]string, error) {
-	url := "https://status.cafe/users/henz/status.json"
+func getStatus(url string) (map[string]string, error) {
 
 	if data, found := cache.Get(url); found {
 		return data.(map[string]string), nil
