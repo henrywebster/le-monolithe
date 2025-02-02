@@ -1,9 +1,9 @@
 {{define "top-artists"}}
 <h2>top music</h2>
-<table>
+<table class="max-width-50">
     {{range .TopArtists}}
     <tr>
-        <td>
+        <td class="width-50">
             <a href="{{.external_urls.spotify}}">{{.name}}</a>
         </td>
         <td>{{.genre}}</td>

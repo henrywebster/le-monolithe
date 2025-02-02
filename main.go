@@ -99,7 +99,7 @@ func formatTime(inputFormat string, t string) (string, error) {
 		return "", err
 	}
 
-	return date.Format("Jan 2, 2006"), nil
+	return date.Format("Jan 02, 2006"), nil
 }
 
 func formatDateTime(inputFormat string, t string) (string, error) {
@@ -108,7 +108,7 @@ func formatDateTime(inputFormat string, t string) (string, error) {
 		return "", err
 	}
 
-	return date.Format("Jan 2, 2006 15:04"), nil
+	return date.Format("Jan 02, 2006 15:04"), nil
 }
 
 type Options struct {

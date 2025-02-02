@@ -1,3 +1,6 @@
+html {
+    scrollbar-gutter: stable;
+}
 body {
     font-family: "IBM Plex Sans", sans-serif;
     display: flex;
@@ -7,9 +10,30 @@ body {
     margin: auto;
     background-color: #f0f0f0;
 }
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 1em;
+    background-color: white;
+}
+td,
+th {
+    border: 1px solid black;
+    padding: 5px;
+    text-align: left;
+}
+
+time {
+    font-family: monospace;
+}
 a {
     color: blue;
     text-decoration: none;
+}
+img {
+    border-style: solid;
+    border-width: thin;
+    max-width: 100%;
 }
 nav ul {
     padding: 0;
@@ -21,33 +45,12 @@ nav li {
 h1 {
     color: black;
 }
-img {
-    border-style: solid;
-    border-width: thin;
-    max-width: 100%;
+.width-0 {
+    width: 0;
 }
-table {
-    border-collapse: collapse;
-    background-color: white;
-    width: 100%;
-    margin-bottom: 1em;
+.width-50 {
+    width: 50%;
 }
-td,
-th {
-    border: 1px solid black;
-    padding: 5px;
-    text-align: left;
-}
-fieldset {
-    border: 1px solid black;
-}
-time {
-    font-family: monospace;
-    white-space: nowrap;
-}
-article {
-    background-color: white;
-    border-style: solid;
-    border-width: thin;
-    padding: 10px;
+.width-25 {
+    width: 25%;
 }

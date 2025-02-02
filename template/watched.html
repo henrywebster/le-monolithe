@@ -1,19 +1,15 @@
 {{define "watched"}}
-<div>
-    <h2>recently watched</h2>
-    <table>
-        {{range .RecentlyWatched}}
-        <tr>
-            <td>
-                <a href="{{.link}}"><em>{{.title}}</em> ({{.filmYear}})</a>
-            </td>
-            <td>
-                <time datetime="{{.watchedDate}}"
-                    >{{.formattedWatchedDate}}</time
-                >
-            </td>
-        </tr>
-        {{end}}
-    </table>
-</div>
+<h2>recently watched</h2>
+<table>
+    {{range .RecentlyWatched}}
+    <tr>
+        <td>
+            <a href="{{.link}}"><em>{{.title}}</em> ({{.filmYear}})</a>
+        </td>
+        <td class="width-25">
+            <time datetime="{{.watchedDate}}">{{.formattedWatchedDate}}</time>
+        </td>
+    </tr>
+    {{end}}
+</table>
 {{end}}

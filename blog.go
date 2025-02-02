@@ -43,7 +43,7 @@ func getPosts() ([]Post, error) {
 		if err := rows.Scan(&post.Title, &post.Slug, &post.MetaDescription, &post.CreatedAt); err != nil {
 			return nil, err
 		}
-		formatted, err := formatDateTime("2006-01-02 15:04:05", post.CreatedAt)
+		formatted, err := formatTime("2006-01-02 15:04:05", post.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
