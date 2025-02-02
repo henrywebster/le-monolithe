@@ -61,9 +61,21 @@ func main() {
 	}
 	blogPostHandler := newBlogPostHandler(tmplBlogPost, &options)
 
+	musicFiles := []string{"base.html", "music.html"}
+	var musicPaths []string
+	for _, file := range musicFiles {
+		musicPaths = append(musicPaths, filepath.Join(options.TemplateDir, file))
+	}
+	tmplMusic, err := template.New("").ParseFiles(musicPaths...)
+	if err != nil {
+		log.Println(err)
+	}
+	musicHandler := newMusicHandler(tmplMusic, &options)
+
 	http.HandleFunc("GET /{$}", homeHandler)
 	http.HandleFunc("GET /blog", blogHandler)
 	http.HandleFunc("GET /blog/{slug}", blogPostHandler)
+	http.HandleFunc("GET /music", musicHandler)
 
 	log.Printf("Starting Le Monolithe on :%d\n", options.Port)
 	http.ListenAndServe(fmt.Sprintf(":%d", options.Port), nil)

@@ -16,10 +16,11 @@ type Link struct {
 }
 
 type Album struct {
-	Links       []Link
-	Title       string
-	ReleaseDate string
-	Id          int
+	Links                []Link
+	Title                string
+	ReleaseDate          string
+	FormattedReleaseDate string
+	Id                   int
 }
 
 type Artist struct {
@@ -49,12 +50,6 @@ func getLinks(album_id int) ([]Link, error) {
 		if err := rows.Scan(&link.Platform, &link.Url); err != nil {
 			return nil, err
 		}
-
-		//	formatted, err := formatDateTime("2006-01-02 15:04:05", post.CreatedAt)
-		//	if err != nil {
-		//		return nil, err
-		//	}
-		//	post.FormattedCreatedAt = formatted
 		links = append(links, link)
 	}
 	if err := rows.Err(); err != nil {
@@ -74,7 +69,7 @@ func getAlbums(artist_id int) ([]Album, error) {
 	defer db.Close()
 
 	var albums []Album
-	rows, err := db.Query("SELECT id, title, release_date FROM albums WHERE artist_id = ?", artist_id)
+	rows, err := db.Query("SELECT id, title, release_date FROM albums WHERE artist_id = ? ORDER BY release_date DESC", artist_id)
 	if err != nil {
 		return nil, err
 	}
@@ -86,11 +81,11 @@ func getAlbums(artist_id int) ([]Album, error) {
 			return nil, err
 		}
 
-		//	formatted, err := formatDateTime("2006-01-02 15:04:05", post.CreatedAt)
-		//	if err != nil {
-		//		return nil, err
-		//	}
-		//	post.FormattedCreatedAt = formatted
+		formatted, err := formatTime("2006-01-02", album.ReleaseDate)
+		if err != nil {
+			return nil, err
+		}
+		album.FormattedReleaseDate = formatted
 		links, err := getLinks(album.Id)
 		if err != nil {
 			return nil, err
@@ -116,7 +111,7 @@ func getArtists() ([]Artist, error) {
 	defer db.Close()
 
 	var artists []Artist
-	rows, err := db.Query("SELECT id, name FROM artists")
+	rows, err := db.Query("SELECT artists.id, name FROM artists LEFT JOIN albums ON artists.id = albums.artist_id GROUP BY name ORDER BY MAX(release_date) DESC")
 	if err != nil {
 		return nil, err
 	}
@@ -133,11 +128,6 @@ func getArtists() ([]Artist, error) {
 			return nil, err
 		}
 		artist.Albums = albums
-		//	formatted, err := formatDateTime("2006-01-02 15:04:05", post.CreatedAt)
-		//	if err != nil {
-		//		return nil, err
-		//	}
-		//	post.FormattedCreatedAt = formatted
 		artists = append(artists, artist)
 	}
 	if err := rows.Err(); err != nil {

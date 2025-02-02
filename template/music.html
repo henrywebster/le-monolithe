@@ -4,7 +4,9 @@
 <table>
     <tr>
         <th>{{.Title}}</th>
-        <th>{{.ReleaseDate}}</th>
+        <td>
+            <time datetime="{{.ReleaseDate}}">{{.FormattedReleaseDate}}</time>
+        </td>
     </tr>
     {{range .Links}}
     <tr>
