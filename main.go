@@ -72,10 +72,14 @@ func main() {
 	}
 	musicHandler := newMusicHandler(tmplMusic, &options)
 
+	staticHandler := newStaticHandler(&options)
+
 	http.HandleFunc("GET /{$}", homeHandler)
 	http.HandleFunc("GET /blog", blogHandler)
 	http.HandleFunc("GET /blog/{slug}", blogPostHandler)
 	http.HandleFunc("GET /music", musicHandler)
+	http.HandleFunc("GET /image/{file}", staticHandler)
+	http.HandleFunc("GET /style/{file}", staticHandler)
 
 	log.Printf("Starting Le Monolithe on :%d\n", options.Port)
 	http.ListenAndServe(fmt.Sprintf(":%d", options.Port), nil)
@@ -116,6 +120,7 @@ type Options struct {
 	StatusCafeURL   string
 	TemplateDir     string
 	Port            int
+	StaticDir       string
 }
 
 func readOptions() (Options, error) {
@@ -140,6 +145,7 @@ func readOptions() (Options, error) {
 	options.GithubQuery = os.Getenv("GITHUB_GRAPHQL_QUERY")
 	options.StatusCafeURL = os.Getenv("STATUS_CAFE_URL")
 	options.TemplateDir = os.Getenv("TEMPLATE_DIR")
+	options.StaticDir = os.Getenv("STATIC_DIR")
 
 	return options, nil
 }
