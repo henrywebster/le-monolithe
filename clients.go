@@ -20,7 +20,7 @@ type ItemMapper = func([]*gofeed.Item) []map[string]string
 
 var cache = NewCache(60 * time.Minute)
 
-func getRss(url string, mapItems ItemMapper) ([]map[string]string, error) {
+func getRss(url string, mapItems ItemMapper, options *Options) ([]map[string]string, error) {
 
 	if data, found := cache.Get(url); found {
 		return data.([]map[string]string), nil
@@ -36,10 +36,6 @@ func getRss(url string, mapItems ItemMapper) ([]map[string]string, error) {
 
 	items := mapItems(feed.Items)
 
-	options, err := readOptions()
-	if err != nil {
-		return nil, err
-	}
 	cache.Set(url, items, options.DefaultCacheTTL)
 
 	return items, nil
@@ -73,7 +69,7 @@ func mapGoodreads(items []*gofeed.Item) []map[string]string {
 	return data
 }
 
-func getStatus(url string) (map[string]string, error) {
+func getStatus(url string, options *Options) (map[string]string, error) {
 
 	if data, found := cache.Get(url); found {
 		return data.(map[string]string), nil
@@ -93,22 +89,18 @@ func getStatus(url string) (map[string]string, error) {
 		return nil, err
 	}
 
-	options, err := readOptions()
-	if err != nil {
-		return nil, err
-	}
 	cache.Set(url, status, options.DefaultCacheTTL)
 
 	return status, nil
 }
 
-func getCommits(token string, query string) ([]map[string]interface{}, error) {
+func getCommits(options *Options) ([]map[string]interface{}, error) {
 	if data, found := cache.Get("commits"); found {
 		return data.([]map[string]interface{}), nil
 	}
 
 	jsonData := map[string]string{
-		"query": query,
+		"query": options.GithubQuery,
 	}
 
 	reqBody, err := json.Marshal(jsonData)
@@ -117,7 +109,7 @@ func getCommits(token string, query string) ([]map[string]interface{}, error) {
 	}
 
 	req, err := http.NewRequest("POST", "https://api.github.com/graphql", bytes.NewBuffer(reqBody))
-	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Authorization", "Bearer "+options.GithubToken)
 	req.Header.Set("Content-Type", "application/json")
 	if err != nil {
 		return nil, err
@@ -162,10 +154,6 @@ func getCommits(token string, query string) ([]map[string]interface{}, error) {
 		commit["formattedCommittedDate"] = formattedTime
 	}
 
-	options, err := readOptions()
-	if err != nil {
-		return nil, err
-	}
 	cache.Set("commits", commits, options.DefaultCacheTTL)
 
 	return commits, nil

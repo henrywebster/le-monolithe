@@ -153,28 +153,28 @@ func readOptions() (Options, error) {
 func newHomeHandler(tmpl *template.Template, options *Options) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		commits, err := getCommits(options.GithubToken, options.GithubQuery)
+		commits, err := getCommits(options)
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		status, err := getStatus(options.StatusCafeURL)
+		status, err := getStatus(options.StatusCafeURL, options)
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		recentlyWatched, err := getRss(options.LetterboxdURL, mapLetterboxd)
+		recentlyWatched, err := getRss(options.LetterboxdURL, mapLetterboxd, options)
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		currentlyReading, err := getRss(options.GoodreadsURL, mapGoodreads)
+		currentlyReading, err := getRss(options.GoodreadsURL, mapGoodreads, options)
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
