@@ -39,7 +39,7 @@ func getLinks(album_id int) ([]Link, error) {
 	defer db.Close()
 
 	var links []Link
-	rows, err := db.Query("SELECT platform, url FROM links WHERE album_id = ?", album_id)
+	rows, err := db.Query("SELECT platform, url FROM links WHERE album_id = ? ORDER BY platform", album_id)
 	if err != nil {
 		return nil, err
 	}
