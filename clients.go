@@ -171,8 +171,12 @@ func getCommits(token string, query string) ([]map[string]interface{}, error) {
 	return commits, nil
 }
 
-func getTopArtists() ([]map[string]interface{}, error) {
+func getTopArtists(options *Options) ([]map[string]interface{}, error) {
+	if data, found := cache.Get("top-artists"); found {
+		return data.([]map[string]interface{}), nil
+	}
 
+	log.Println("Fetching top artists")
 	auth := spotifyauth.New(
 		spotifyauth.WithClientID(os.Getenv("SPOTIFY_CLIENT_ID")),
 		spotifyauth.WithClientSecret(os.Getenv("SPOTIFY_CLIENT_SECRET")),
@@ -209,5 +213,6 @@ func getTopArtists() ([]map[string]interface{}, error) {
 		}
 	}
 
+	cache.Set("top-artists", artists, options.DefaultCacheTTL)
 	return artists, nil
 }

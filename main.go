@@ -181,7 +181,7 @@ func newHomeHandler(tmpl *template.Template, options *Options) http.HandlerFunc 
 			return
 		}
 
-		topArtists, err := getTopArtists()
+		topArtists, err := getTopArtists(options)
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusInternalServerError)
