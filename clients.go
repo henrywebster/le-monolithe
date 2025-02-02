@@ -171,7 +171,6 @@ func getCommits(token string, query string) ([]map[string]interface{}, error) {
 	return commits, nil
 }
 
-// func getTopArtists(client_id string, client_secret string, refresh_token string) ([]map[string]interface{}, error) {
 func getTopArtists() ([]map[string]interface{}, error) {
 
 	auth := spotifyauth.New(
@@ -202,6 +201,12 @@ func getTopArtists() ([]map[string]interface{}, error) {
 	artists := make([]map[string]interface{}, len(items))
 	for i, item := range items {
 		artists[i] = item.(map[string]interface{})
+		genre := artists[i]["genres"].([]interface{})
+		if len(genre) > 0 {
+			artists[i]["genre"] = genre[0]
+		} else {
+			artists[i]["genre"] = ""
+		}
 	}
 
 	return artists, nil
