@@ -30,6 +30,24 @@ CREATE TABLE posts (
     -- status TEXT CHECK(status IN ('draft', 'published')) NOT NULL DEFAULT 'draft',
     created_at TEXT NOT NULL
 ) STRICT;
+CREATE TABLE artists (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL
+) STRICT;
+CREATE TABLE albums (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    artist_id INTEGER,
+    title TEXT NOT NULL,
+    release_date TEXT NOT NULL,
+    FOREIGN KEY (artist_id) REFERENCES artists(id) ON DELETE CASCADE
+) STRICT;
+CREATE TABLE links (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    album_id INTEGER,
+    platform TEXT NOT NULL,
+    url TEXT NOT NULL,
+    FOREIGN KEY (album_id) REFERENCES albums(id) ON DELETE CASCADE
+) STRICT;
 -- Dbmate schema migrations
 INSERT INTO "schema_migrations" (version) VALUES
   ('20250131163110');

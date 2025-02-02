@@ -1,0 +1,17 @@
+{{define "content"}} {{range .}}
+<h2>{{.Name}}</h2>
+{{range .Albums}}
+<table>
+    <tr>
+        <th>{{.Title}}</th>
+        <th>{{.ReleaseDate}}</th>
+    </tr>
+    {{range .Links}}
+    <tr>
+        <td colspan="2">
+            <a href="{{.Url}}">{{.Platform}}</a>
+        </td>
+    </tr>
+    {{end}}
+</table>
+{{end}} {{end}} {{end}}
