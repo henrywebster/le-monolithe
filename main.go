@@ -27,7 +27,7 @@ func main() {
 	}
 
 	// TODO: better way to handle templates
-	homeFiles := []string{"base.html", "home.html", "commits.html", "status.html", "watched.html", "reading.html"}
+	homeFiles := []string{"base.html", "home.html", "commits.html", "status.html", "watched.html", "reading.html", "top-artists.html"}
 	var paths []string
 	for _, file := range homeFiles {
 		paths = append(paths, filepath.Join(options.TemplateDir, file))
@@ -74,6 +74,7 @@ type Data struct {
 	RecentlyWatched  []map[string]string
 	CurrentlyReading []map[string]string
 	Commits          []map[string]interface{}
+	TopArtists       []map[string]interface{}
 }
 
 func formatTime(inputFormat string, t string) (string, error) {
@@ -162,7 +163,14 @@ func newHomeHandler(tmpl *template.Template, options *Options) http.HandlerFunc 
 			return
 		}
 
-		tmpl.ExecuteTemplate(w, "base", Data{Status: status, RecentlyWatched: recentlyWatched, CurrentlyReading: currentlyReading, Commits: commits})
+		topArtists, err := getTopArtists()
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		tmpl.ExecuteTemplate(w, "base", Data{Status: status, RecentlyWatched: recentlyWatched, CurrentlyReading: currentlyReading, Commits: commits, TopArtists: topArtists})
 
 	}
 }

@@ -1,0 +1,13 @@
+{{define "top-artists"}}
+<h2>top music</h2>
+<table>
+    {{range .TopArtists}}
+    <tr>
+        <td>
+            <a href="{{.external_urls.spotify}}">{{.name}}</a>
+        </td>
+        <td>{{.genres}}</td>
+    </tr>
+    {{end}}
+</table>
+{{end}}

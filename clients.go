@@ -2,11 +2,16 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"time"
+
+	spotifyauth "github.com/zmb3/spotify/v2/auth"
+	"golang.org/x/oauth2"
 
 	"github.com/mmcdole/gofeed"
 )
@@ -164,4 +169,40 @@ func getCommits(token string, query string) ([]map[string]interface{}, error) {
 	cache.Set("commits", commits, options.DefaultCacheTTL)
 
 	return commits, nil
+}
+
+// func getTopArtists(client_id string, client_secret string, refresh_token string) ([]map[string]interface{}, error) {
+func getTopArtists() ([]map[string]interface{}, error) {
+
+	auth := spotifyauth.New(
+		spotifyauth.WithClientID(os.Getenv("SPOTIFY_CLIENT_ID")),
+		spotifyauth.WithClientSecret(os.Getenv("SPOTIFY_CLIENT_SECRET")),
+	)
+
+	token, err := auth.RefreshToken(context.Background(), &oauth2.Token{RefreshToken: os.Getenv("SPOTIFY_REFRESH_TOKEN")})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	client := auth.Client(context.Background(), token)
+	resp, err := client.Get("https://api.spotify.com/v1/me/top/artists?limit=5")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	result, err := io.ReadAll(resp.Body)
+	var body map[string]interface{}
+	if err := json.Unmarshal(result, &body); err != nil {
+		return nil, err
+	}
+
+	items := body["items"].([]interface{})
+
+	artists := make([]map[string]interface{}, len(items))
+	for i, item := range items {
+		artists[i] = item.(map[string]interface{})
+	}
+
+	return artists, nil
 }
