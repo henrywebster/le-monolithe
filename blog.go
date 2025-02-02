@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/yuin/goldmark"
@@ -22,7 +23,9 @@ type Post struct {
 }
 
 func getPosts() ([]Post, error) {
-	db, err := sql.Open("sqlite3", "data.db")
+	databaseFile := os.Getenv("DATABASE_FILE")
+
+	db, err := sql.Open("sqlite3", databaseFile)
 	if err != nil {
 		return nil, err
 	}
@@ -55,9 +58,10 @@ func getPosts() ([]Post, error) {
 }
 
 func getPost(slug string) (Post, error) {
+	databaseFile := os.Getenv("DATABASE_FILE")
 	var post Post
 
-	db, err := sql.Open("sqlite3", "data.db")
+	db, err := sql.Open("sqlite3", databaseFile)
 	if err != nil {
 		return post, err
 	}

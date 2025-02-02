@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 )
@@ -12,25 +14,59 @@ import (
 // TODO
 // - set timeouts on http requests
 // - use async
+// - favicon
+// - 404 page
+
+type HandlerCreator = func(*Options) (func(http.ResponseWriter, *http.Request), error)
 
 func main() {
 
-	homeHandler, err := newHomeHandler()
+	options, err := readOptions()
 	if err != nil {
 		panic(err)
 	}
+
+	// TODO: better way to handle templates
+	homeFiles := []string{"base.html", "home.html", "commits.html", "status.html", "watched.html", "reading.html"}
+	var paths []string
+	for _, file := range homeFiles {
+		paths = append(paths, filepath.Join(options.TemplateDir, file))
+	}
+	log.Println(paths)
+	tmplHome, err := template.New("").ParseFiles(paths...)
+	if err != nil {
+		log.Println(err)
+	}
+	homeHandler := newHomeHandler(tmplHome, &options)
+
+	blogFiles := []string{"base.html", "blog.html"}
+	var blogPaths []string
+	for _, file := range blogFiles {
+		blogPaths = append(blogPaths, filepath.Join(options.TemplateDir, file))
+	}
+	tmplBlog, err := template.New("").ParseFiles(blogPaths...)
+	if err != nil {
+		log.Println(err)
+	}
+	blogHandler := newBlogHandler(tmplBlog, &options)
+
+	blogPostFiles := []string{"base.html", "post.html"}
+	var blogPostPaths []string
+	for _, file := range blogPostFiles {
+		blogPostPaths = append(blogPostPaths, filepath.Join(options.TemplateDir, file))
+	}
+	tmplBlogPost, err := template.New("").ParseFiles(blogPostPaths...)
+	if err != nil {
+		log.Println(err)
+	}
+	blogPostHandler := newBlogPostHandler(tmplBlogPost, &options)
 
 	http.HandleFunc("GET /{$}", homeHandler)
 	http.HandleFunc("GET /blog", blogHandler)
 	http.HandleFunc("GET /blog/{slug}", blogPostHandler)
 
-	//http.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
-	//http.ServeFile(w, r, "favicon.ico")
-
-	//})
-
-	log.Println("Starting Le Monolithe")
-	http.ListenAndServe(":8080", nil)
+	log.Printf("Starting Le Monolithe on :%d\n", options.Port)
+	http.ListenAndServe(fmt.Sprintf(":%d", options.Port), nil)
 }
 
 type Data struct {
@@ -65,6 +101,8 @@ type Options struct {
 	GithubToken     string
 	GithubQuery     string
 	StatusCafeURL   string
+	TemplateDir     string
+	Port            int
 }
 
 func readOptions() (Options, error) {
@@ -76,26 +114,24 @@ func readOptions() (Options, error) {
 	}
 	options.DefaultCacheTTL = time.Duration(defaultCacheTTL) * time.Second
 
+	portStr := os.Getenv("PORT")
+	port, err := strconv.Atoi(portStr)
+	if err != nil {
+		return options, err
+	}
+	options.Port = port
+
 	options.LetterboxdURL = os.Getenv("LETTERBOXD_URL")
 	options.GoodreadsURL = os.Getenv("GOODREADS_URL")
 	options.GithubToken = os.Getenv("GITHUB_TOKEN")
 	options.GithubQuery = os.Getenv("GITHUB_GRAPHQL_QUERY")
 	options.StatusCafeURL = os.Getenv("STATUS_CAFE_URL")
+	options.TemplateDir = os.Getenv("TEMPLATE_DIR")
 
 	return options, nil
 }
 
-func newHomeHandler() (http.HandlerFunc, error) {
-	tmpl, err := template.New("").ParseFiles("template/base.html", "template/home.html", "template/commits.html", "template/status.html", "template/watched.html", "template/reading.html")
-	if err != nil {
-		return nil, err
-	}
-
-	options, err := readOptions()
-	if err != nil {
-		return nil, err
-	}
-
+func newHomeHandler(tmpl *template.Template, options *Options) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		commits, err := getCommits(options.GithubToken, options.GithubQuery)
@@ -128,5 +164,5 @@ func newHomeHandler() (http.HandlerFunc, error) {
 
 		tmpl.ExecuteTemplate(w, "base", Data{Status: status, RecentlyWatched: recentlyWatched, CurrentlyReading: currentlyReading, Commits: commits})
 
-	}, nil
+	}
 }

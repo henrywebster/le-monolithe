@@ -5,6 +5,7 @@
       go
       dbmate
       sqlite
+      flyctl
     ];
 
     shellHook = ''
