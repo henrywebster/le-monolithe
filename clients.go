@@ -18,7 +18,7 @@ import (
 
 type ItemMapper = func([]*gofeed.Item) []map[string]string
 
-var cache = NewCache(time.Minute)
+var cache = NewCache(60 * time.Minute)
 
 func getRss(url string, mapItems ItemMapper) ([]map[string]string, error) {
 
