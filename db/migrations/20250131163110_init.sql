@@ -38,6 +38,7 @@ CREATE TABLE albums (
     artist_id INTEGER,
     title TEXT NOT NULL,
     release_date TEXT NOT NULL,
+    cover_url TEXT NOT NULL,
     FOREIGN KEY (artist_id) REFERENCES artists(id) ON DELETE CASCADE
 ) STRICT;
 

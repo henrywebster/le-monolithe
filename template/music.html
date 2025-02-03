@@ -3,11 +3,17 @@
 {{range .Albums}}
 <table>
     <tr>
-        <th>{{.Title}}</th>
-        <td class="width-25">
+        <td rowspan="2" class="no-padding width-25">
+            <img src="{{.CoverUrl}}" />
+        </td>
+        <th class="align-top">{{.Title}}</th>
+    </tr>
+    <tr>
+        <td class="set-height">
             <time datetime="{{.ReleaseDate}}">{{.FormattedReleaseDate}}</time>
         </td>
     </tr>
+
     {{range .Links}}
     <tr>
         <td colspan="2">

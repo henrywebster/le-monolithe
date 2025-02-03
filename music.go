@@ -20,6 +20,7 @@ type Album struct {
 	Title                string
 	ReleaseDate          string
 	FormattedReleaseDate string
+	CoverUrl             string
 	Id                   int
 }
 
@@ -69,7 +70,7 @@ func getAlbums(artist_id int) ([]Album, error) {
 	defer db.Close()
 
 	var albums []Album
-	rows, err := db.Query("SELECT id, title, release_date FROM albums WHERE artist_id = ? ORDER BY release_date DESC", artist_id)
+	rows, err := db.Query("SELECT id, title, release_date, cover_url FROM albums WHERE artist_id = ? ORDER BY release_date DESC", artist_id)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +78,7 @@ func getAlbums(artist_id int) ([]Album, error) {
 
 	for rows.Next() {
 		var album Album
-		if err := rows.Scan(&album.Id, &album.Title, &album.ReleaseDate); err != nil {
+		if err := rows.Scan(&album.Id, &album.Title, &album.ReleaseDate, &album.CoverUrl); err != nil {
 			return nil, err
 		}
 
