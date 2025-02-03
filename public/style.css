@@ -68,3 +68,10 @@ h1 {
 }
 .align-top {
     vertical-align: top;
+}
+.font-small {
+    font-size: small;
+}
+.footnotes ol li p {
+    overflow: auto;
+}
