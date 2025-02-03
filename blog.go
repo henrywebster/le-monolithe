@@ -32,7 +32,7 @@ func getPosts() ([]Post, error) {
 	defer db.Close()
 
 	var posts []Post
-	rows, err := db.Query("SELECT title, slug, meta_description, created_at FROM posts")
+	rows, err := db.Query("SELECT title, slug, meta_description, created_at FROM posts ORDER BY created_at DESC")
 	if err != nil {
 		return nil, err
 	}

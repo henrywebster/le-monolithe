@@ -19,7 +19,7 @@ table {
 td,
 th {
     border: 1px solid black;
-    padding: 5px;
+    padding: 0.25em;
     text-align: left;
 }
 
@@ -51,8 +51,13 @@ nav li {
 h1 {
     color: black;
 }
+sup {
+    line-height: 0;
+    font-size: 0.83em;
+    vertical-align: super;
+}
 .width-0 {
-    width: 0;
+    width: 20px;
 }
 .width-50 {
     width: 50%;
@@ -64,7 +69,8 @@ h1 {
     padding: 0;
 }
 .set-height {
-    height: 1em;
+    height: 12px;
+    vertical-align: top;
 }
 .align-top {
     vertical-align: top;
