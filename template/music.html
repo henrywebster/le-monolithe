@@ -1,7 +1,7 @@
 {{define "content"}} {{range .}}
 <h2>{{.Name}}</h2>
 {{range .Albums}}
-<table>
+<table class="album-table">
     <tr>
         <td rowspan="2" class="no-padding width-25">
             <img src="{{.CoverUrl}}" />

@@ -11,16 +11,22 @@ body {
     background-color: #f0f0f0;
 }
 table {
-    border-collapse: collapse;
+    /* border-collapse: collapse; */
     width: 100%;
     margin-bottom: 1em;
-    background-color: white;
+    /* background-color: white; */
 }
 td,
 th {
-    border: 1px solid black;
-    padding: 0.25em;
+    /* border: 1px solid black; */
+    /* padding: 0.25em; */
     text-align: left;
+}
+.list-table {
+    border-spacing: 0 1em;
+}
+.album-table {
+    padding-bottom: 2em;
 }
 
 time {
