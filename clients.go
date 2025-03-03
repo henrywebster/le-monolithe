@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -116,11 +117,15 @@ func getCommits(options *Options) ([]map[string]interface{}, error) {
 	}
 
 	response, err := http.DefaultClient.Do(req)
+	defer response.Body.Close()
+
 	log.Println("Fetching commits")
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", response.StatusCode)
+	}
 
 	result, err := io.ReadAll(response.Body)
 	var body map[string]interface{}

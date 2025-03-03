@@ -156,8 +156,8 @@ func newHomeHandler(tmpl *template.Template, options *Options) http.HandlerFunc 
 		commits, err := getCommits(options)
 		if err != nil {
 			log.Println(err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			//http.Error(w, err.Error(), http.StatusInternalServerError)
+			//return
 		}
 
 		status, err := getStatus(options.StatusCafeURL, options)

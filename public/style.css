@@ -81,3 +81,9 @@ sup {
 .footnotes ol li p {
     overflow: auto;
 }
+.error {
+    background-color: lightpink;
+    border-style: solid;
+    border-width: thin;
+    padding: 5px;
+}
