@@ -1,5 +1,6 @@
 {{define "watched"}}
 <h2>recently watched</h2>
+{{if .RecentlyWatched}}
 <table>
     {{range .RecentlyWatched}}
     <tr>
@@ -12,4 +13,6 @@
     </tr>
     {{end}}
 </table>
-{{end}}
+{{end}} {{if not .RecentlyWatched}}
+<div class="error">☹️ error ☹️</div>
+{{end}} {{end}}

@@ -45,7 +45,7 @@ func getRss(url string, mapItems ItemMapper, options *Options) ([]map[string]str
 func mapLetterboxd(items []*gofeed.Item) []map[string]string {
 	// TODO - handle errors
 	data := make([]map[string]string, len(items))
-	for i := 0; i < len(items); i++ {
+	for i := range items {
 		formattedDate, _ := formatTime("2006-01-02", items[i].Extensions["letterboxd"]["watchedDate"][0].Value)
 
 		data[i] = make(map[string]string)
@@ -61,7 +61,7 @@ func mapLetterboxd(items []*gofeed.Item) []map[string]string {
 func mapGoodreads(items []*gofeed.Item) []map[string]string {
 	// TODO - handle errors
 	data := make([]map[string]string, len(items))
-	for i := 0; i < len(items); i++ {
+	for i := range items {
 		data[i] = make(map[string]string)
 		data[i]["title"] = items[i].Title
 		data[i]["link"] = items[i].Link
@@ -83,6 +83,9 @@ func getStatus(url string, options *Options) (map[string]string, error) {
 		return nil, err
 	}
 	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", response.StatusCode)
+	}
 
 	var status map[string]string
 	err = json.NewDecoder(response.Body).Decode(&status)
@@ -117,12 +120,11 @@ func getCommits(options *Options) ([]map[string]interface{}, error) {
 	}
 
 	response, err := http.DefaultClient.Do(req)
-	defer response.Body.Close()
-
 	log.Println("Fetching commits")
 	if err != nil {
 		return nil, err
 	}
+	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected status code: %d", response.StatusCode)
 	}

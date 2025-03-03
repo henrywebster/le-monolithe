@@ -163,24 +163,23 @@ func newHomeHandler(tmpl *template.Template, options *Options) http.HandlerFunc 
 		status, err := getStatus(options.StatusCafeURL, options)
 		if err != nil {
 			log.Println(err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			//http.Error(w, err.Error(), http.StatusInternalServerError)
+			//return
 		}
 
 		recentlyWatched, err := getRss(options.LetterboxdURL, mapLetterboxd, options)
 		if err != nil {
 			log.Println(err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			//http.Error(w, err.Error(), http.StatusInternalServerError)
+			//return
 		}
 
 		currentlyReading, err := getRss(options.GoodreadsURL, mapGoodreads, options)
 		if err != nil {
 			log.Println(err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			//http.Error(w, err.Error(), http.StatusInternalServerError)
+			//return
 		}
-
 		topArtists, err := getTopArtists(options)
 		if err != nil {
 			log.Println(err.Error())

@@ -1,5 +1,6 @@
 {{define "status"}}
 <h2>latest status</h2>
+{{if .Status}}
 <table>
     <tr>
         <td colspan="2">{{.Status.content}}</td>
@@ -9,4 +10,6 @@
         <td><code>{{.Status.timeAgo}}</code></td>
     </tr>
 </table>
-{{end}}
+{{end}} {{if not .Status}}
+<div class="error">☹️ error ☹️</div>
+{{end}} {{end}}

@@ -1,5 +1,6 @@
 {{define "reading"}}
 <h2>currently reading</h2>
+{{if .CurrentlyReading}}
 <table class="max-width-50 list-table">
     {{range .CurrentlyReading}}
     <tr>
@@ -10,4 +11,6 @@
     </tr>
     {{end}}
 </table>
-{{end}}
+{{end}} {{if not .CurrentlyReading}}
+<div class="error">☹️ error ☹️</div>
+{{end}} {{end}}
