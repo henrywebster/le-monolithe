@@ -7,7 +7,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
+	"github.com/gorilla/feeds"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
@@ -122,4 +124,23 @@ func newBlogPostHandler(tmpl *template.Template, _ *Options) http.HandlerFunc {
 
 		tmpl.ExecuteTemplate(w, "base", post)
 	}
+}
+
+func postsToFeed(posts []Post) ([]*feeds.Item, error) {
+	items := make([]*feeds.Item, len(posts))
+	for i := range posts {
+		created, err := time.Parse("2006-01-02 15:04:05", posts[i].CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		item := &feeds.Item{
+			Title: posts[i].Title,
+			Link:  &feeds.Link{Href: "https://henz.world/blog/" + posts[i].Slug},
+			Description: posts[i].MetaDescription,
+			Created: created,
+		}
+		items[i] = item
+	}
+
+	return items, nil
 }

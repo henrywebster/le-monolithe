@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"time"
+
+	"github.com/gorilla/feeds"
 )
 
 // TODO
@@ -74,12 +76,15 @@ func main() {
 
 	staticHandler := newStaticHandler(&options)
 
+	feedHandler := newFeedHandler()
+
 	http.HandleFunc("GET /{$}", homeHandler)
 	http.HandleFunc("GET /blog", blogHandler)
 	http.HandleFunc("GET /blog/{slug}", blogPostHandler)
 	http.HandleFunc("GET /music", musicHandler)
 	http.HandleFunc("GET /image/{file}", staticHandler)
 	http.HandleFunc("GET /style/{file}", staticHandler)
+	http.HandleFunc("GET /feed", feedHandler)
 
 	log.Printf("Starting Le Monolithe on :%d\n", options.Port)
 	http.ListenAndServe(fmt.Sprintf(":%d", options.Port), nil)
@@ -189,5 +194,44 @@ func newHomeHandler(tmpl *template.Template, options *Options) http.HandlerFunc 
 
 		tmpl.ExecuteTemplate(w, "base", Data{Status: status, RecentlyWatched: recentlyWatched, CurrentlyReading: currentlyReading, Commits: commits, TopArtists: topArtists})
 
+	}
+}
+
+func newFeedHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/atom+xml")
+
+		now := time.Now()
+		feed := &feeds.Feed{
+			Title:       "henz.world blog",
+			Link:        &feeds.Link{Href: "https://henz.world/blog"},
+			Description: "musings from the blog of Henry J. Webster",
+			Author:      &feeds.Author{Name: "Henry J. Webster", Email: "henz.world.qv1ok@dralias.com"},
+			Created:     now,
+		}
+
+		posts, err := getPosts()
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		items, err := postsToFeed(posts)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		feed.Items = items
+
+		atom, err := feed.ToAtom()
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Write([]byte(atom))
 	}
 }
