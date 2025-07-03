@@ -134,10 +134,10 @@ func postsToFeed(posts []Post) ([]*feeds.Item, error) {
 			return nil, err
 		}
 		item := &feeds.Item{
-			Title: posts[i].Title,
-			Link:  &feeds.Link{Href: "https://henz.world/blog/" + posts[i].Slug},
+			Title:       posts[i].Title,
+			Link:        &feeds.Link{Href: "https://henz.world/blog/" + posts[i].Slug},
 			Description: posts[i].MetaDescription,
-			Created: created,
+			Created:     created,
 		}
 		items[i] = item
 	}
