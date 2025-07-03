@@ -14,5 +14,7 @@
         source .env
         set +a
       fi
+
+      export PATH=$PATH:$(go env GOPATH)/bin
     '';
 }
