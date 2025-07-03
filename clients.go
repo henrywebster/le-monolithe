@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"html"
 	"io"
 	"log"
 	"net/http"
@@ -92,6 +93,8 @@ func getStatus(url string, options *Options) (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	status["content"] = html.UnescapeString(status["content"])
 
 	cache.Set(url, status, options.DefaultCacheTTL)
 
